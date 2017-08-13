@@ -3041,7 +3041,7 @@ final class Parser(AST) : Lexer
     /********************************
      * Parse struct, union, interface, class.
      */
-    AST.Dsymbol parseAggregate()
+    AST.Dsymbol parseAggregate(bool usingStandardLinkage)
     {
         AST.TemplateParameters* tpl = null;
         AST.Expression constraint;
@@ -3134,7 +3134,7 @@ final class Parser(AST) : Lexer
             if (!id)
                 error(loc, "anonymous classes not allowed");
             bool inObject = md && !md.packages && md.id == Id.object;
-            a = new AST.ClassDeclaration(loc, id, baseclasses, members, inObject);
+            a = new AST.ClassDeclaration(loc, id, baseclasses, members, !usingStandardLinkage || inObject);
             break;
 
         case TOKstruct:
@@ -4263,7 +4263,7 @@ final class Parser(AST) : Lexer
             token.value == TOKclass ||
             token.value == TOKinterface)
         {
-            AST.Dsymbol s = parseAggregate();
+            AST.Dsymbol s = parseAggregate((link == LINK.d) || (link == LINK.def) /* non-standard linkage requested */);
             auto a = new AST.Dsymbols();
             a.push(s);
 
